@@ -3,7 +3,6 @@ from discord.ext import commands
 from discord import app_commands
 import aiomysql
 import os
-import asyncio
 from views.channelclosureconfirmation import ChannelClosureConfirmation
 from views.ticketcreation import TicketCreation
 
