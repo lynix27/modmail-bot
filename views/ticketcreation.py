@@ -3,11 +3,15 @@ import aiomysql
 import os
 
 class TicketCreation(discord.ui.View):
-    def __init__(self, label: str=None):
+    def __init__(self, label: str=None, message: str=None):
         super().__init__(timeout=None)
         self.label = label
+        self.message = message
 
-        self.button1 = discord.ui.Button(label="Create a ticket", style=discord.ButtonStyle.green, custom_id="button:create_ticket", emoji="📩")
+        if self.label == "":
+            self.button1 = discord.ui.Button(label=self.message, style=discord.ButtonStyle.green, custom_id="button:create_ticket", emoji="📩")
+        else:
+            self.button1 = discord.ui.Button(label=str(self.label), style=discord.ButtonStyle.green, custom_id="button:create_ticket", emoji="📩")
         
         async def button1_callback(interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True, thinking=True)

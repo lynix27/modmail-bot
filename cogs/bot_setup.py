@@ -28,7 +28,7 @@ class setup_channels(commands.Cog):
         ticket_channel = await interaction.guild.create_text_channel("create-ticket")
         await ticket_channel.set_permissions(interaction.guild.default_role, send_messages=False)
 
-        message = await ticket_channel.send("✉️ Click the button to create a new ticket!", view=TicketCreation())
+        message = await ticket_channel.send("✉️ Click the button to create a new ticket!", view=TicketCreation(label="Create a ticket"))
 
         await cursor.execute("INSERT INTO ticket_button_messages (SERVERID, MESSAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE MESSAGE = %s", (interaction.guild.id, "Create a ticket", "Create a ticket",))
 

@@ -4,53 +4,8 @@ from discord import app_commands
 import os
 import aiomysql
 import asyncio
+from views.ticketcreation import TicketCreation
 
-class TicketCreation(discord.ui.View):
-    def __init__(self, label: str=None, message: str=None):
-        super().__init__(timeout=None)
-        self.label = label
-        self.message = message
-
-        if self.label == "":
-            print("in class: label value none")
-            self.button1 = discord.ui.Button(label=self.message, style=discord.ButtonStyle.green, custom_id="button:create_ticket", emoji="📩")
-            print("in class: set button label to message value")
-        else:
-            print("in class: label value not none")
-            self.button1 = discord.ui.Button(label=str(self.label), style=discord.ButtonStyle.green, custom_id="button:create_ticket", emoji="📩")
-            print("in class: set button label to given value")
-
-        async def button1_callback(interaction: discord.Interaction):
-            await interaction.response.defer(ephemeral=True, thinking=True)
-            conn = await aiomysql.connect(
-                host=os.getenv("HOST"),
-                user=os.getenv("USER"),
-                password=os.getenv("PASSWORD"),
-                db=os.getenv("DB"),
-                autocommit=True
-            )
-            cursor = await conn.cursor()
-            await cursor.execute("SELECT CATEGORYID FROM ticket_categories WHERE SERVERID = %s", (interaction.guild.id,))
-            category_id = await cursor.fetchone()
-
-            overwrites = {interaction.guild.default_role: discord.PermissionOverwrite(view_channel=False, read_messages=False), interaction.user: discord.PermissionOverwrite(read_messages=True, send_messages=True, view_channel=True)}
-            category = interaction.guild.get_channel(int(category_id[0]))
-
-            if discord.utils.get(category.text_channels, name=f"{interaction.user.name}"):
-                await cursor.close()
-                conn.close()
-                await interaction.followup.send("❗ There already is an open ticket channel! Please wait for it to be closed in order to open a new one.", ephemeral=True)
-                return
-
-            channel = await category.create_text_channel(name=interaction.user.name, overwrites=overwrites)
-
-            await cursor.close()
-            conn.close()
-            await interaction.followup.send(f"✅ Ticket channel created: {channel.mention}", ephemeral=True)
-
-        self.button1.callback = button1_callback
-
-        self.add_item(self.button1)
 
 class MessageModal(discord.ui.Modal, title="Change ticket creation button message"):
     text = discord.ui.TextInput(label="Enter the new message", placeholder="Input text", min_length=1, max_length=500, style=discord.TextStyle.long)
@@ -100,11 +55,8 @@ class MessageModal(discord.ui.Modal, title="Change ticket creation button messag
                     await old_message.edit(content=str(self.text.value), view=TicketCreation(label=str(self.label.value), message=str(res[0])))
                     print("message edited")
                 else:
-                    print("label value not none")
                     await cursor.execute("INSERT INTO ticket_button_messages (SERVERID, MESSAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE MESSAGE = %s", (interaction.guild.id, str(self.label.value), str(self.label.value)))
-                    print("message saved to database")
                     await old_message.edit(content=str(self.text.value), view=TicketCreation(label=str(self.label.value)))
-                    print("message edited")
                 await cursor.close()
                 conn.close()
 
@@ -182,6 +134,13 @@ class customisation(commands.Cog):
             state_res = await cursor.fetchone()
             if state_res is None or state_res[0] == "enabled":
                 await cursor.execute("INSERT INTO ticket_manager_roles (SERVERID, ROLEID, STATE) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE ROLEID = %s, STATE = %s", (interaction.guild.id, role.id, "enabled", role.id, "enabled",))
+                await cursor.close()
+                conn.close()
+                await interaction.followup.send(f"I changed the ticket manager role to {role.mention}!", ephemeral=True)
+            else:
+                await cursor.close()
+                conn.close()
+                await interaction.followup.send("❗ The Ticket Manager role module is disabled!", ephemeral=True)
 
             
 
