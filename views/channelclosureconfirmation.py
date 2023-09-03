@@ -26,7 +26,7 @@ class ChannelClosureConfirmation(discord.ui.View):
             pass
         else:
             log_channel = interaction.guild.get_channel(int(result[0]))
-            embed = discord.Embed(title="🗑️ Ticket has been deleted", description=f"The ticket channel for the user **{interaction.channel.name}** (**{interaction.channel.id}**) has been deleted by {interaction.user.mention}.")
+            embed = discord.Embed(title="🗑️ Ticket has been deleted", description=f"The ticket channel for the user **{interaction.channel.name}** (**{interaction.channel.id}**) has been deleted by {interaction.user.mention} (**{interaction.user.id}**).")
             await cursor.close()
             conn.close()
             await log_channel.send(embed=embed)

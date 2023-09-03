@@ -48,12 +48,9 @@ class MessageModal(discord.ui.Modal, title="Change ticket creation button messag
                     return
 
                 if self.label.value == "":
-                    print("label value none")
                     await cursor.execute("SELECT MESSAGE FROM ticket_button_messages WHERE SERVERID = %s", (interaction.guild.id,))
                     res = await cursor.fetchone()
-                    print("message fetched")
                     await old_message.edit(content=str(self.text.value), view=TicketCreation(label=str(self.label.value), message=str(res[0])))
-                    print("message edited")
                 else:
                     await cursor.execute("INSERT INTO ticket_button_messages (SERVERID, MESSAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE MESSAGE = %s", (interaction.guild.id, str(self.label.value), str(self.label.value)))
                     await old_message.edit(content=str(self.text.value), view=TicketCreation(label=str(self.label.value)))

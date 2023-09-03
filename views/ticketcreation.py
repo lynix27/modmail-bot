@@ -37,6 +37,18 @@ class TicketCreation(discord.ui.View):
 
             channel = await category.create_text_channel(name=interaction.user.name, overwrites=overwrites)
 
+            await cursor.execute("SELECT CHANNELID from log_channels WHERE SERVERID = %s", (interaction.guild.id,))
+            result = await cursor.fetchone()
+            if result is None:
+                pass
+            else:
+                try:
+                    log_channel = interaction.guild.get_channel(int(result[0]))
+                    embed = discord.Embed(title="✉️ Ticket has been created", description=f"The ticket channel for the user **{channel.name}** (**{channel.id}**) has been created by {interaction.user.mention} (**{interaction.user.id}**).")
+                    await log_channel.send(embed=embed)
+                except:
+                    pass
+
             await cursor.close()
             conn.close()
             await interaction.followup.send(f"✅ Ticket channel created: {channel.mention}", ephemeral=True)
