@@ -20,4 +20,4 @@ Run the script by using:
 ```bash
 python3 main.py
 ```
-(This command may vary based om your OS.)
+(This command may vary based on your OS.)
