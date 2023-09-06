@@ -65,6 +65,7 @@ class customisation(commands.Cog):
 
 
     @app_commands.command(name="edit-ticket-message", description="Change message and button text")
+    @app_commands.checks.has_permissions(administrator=True)
     async def edit_ticket_msg(self, interaction: discord.Interaction):
         await interaction.response.send_modal(MessageModal())
 
@@ -138,9 +139,22 @@ class customisation(commands.Cog):
                 await cursor.close()
                 conn.close()
                 await interaction.followup.send("❗ The Ticket Manager role module is disabled!", ephemeral=True)
-
-            
-
+    
+    @app_commands.command(name="ticket-category", description="Set a ticket category")
+    @app_commands.checks.has_permissions(administrator=True)
+    async def ticket_category(self, interaction: discord.Interaction, category: discord.CategoryChannel):
+        conn = await aiomysql.connect(
+            host=os.getenv("HOST"),
+            user=os.getenv("USER"),
+            password=os.getenv("PASSWORD"),
+            db=os.getenv("DB"),
+            autocommit=True
+        )
+        cursor = await conn.cursor()
+        await cursor.execute("INSERT INTO ticket_categories (SERVERID, CATEGORYID) VALUES (%s, %s) ON DUPLICATE KEY UPDATE CHANNELID = %s", (interaction.guild.id, category.id, category.id))
+        await cursor.close()
+        conn.close()
+        await interaction.response.send_message(f"✅ The ticket channel category is now set to **{category.name}**!", ephemeral=True)
 
 async def setup(bot: commands.Bot):
     bot.add_view(TicketCreation())
