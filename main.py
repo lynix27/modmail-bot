@@ -17,8 +17,8 @@ class MyBot(commands.Bot):
 
     def __init__(self):
         super().__init__(
-            command_prefix = "m.",
-            intents = discord.Intents.all())
+            command_prefix = commands.when_mentioned(),
+            intents = discord.Intents.default())
 
     async def setup_hook(self):
         conn = await aiomysql.connect(
