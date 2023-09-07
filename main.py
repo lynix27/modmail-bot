@@ -17,7 +17,7 @@ class MyBot(commands.Bot):
 
     def __init__(self):
         super().__init__(
-            command_prefix = commands.when_mentioned(),
+            command_prefix = commands.when_mentioned,
             intents = discord.Intents.default())
 
     async def setup_hook(self):
