@@ -33,3 +33,5 @@ Run the script by using:
 python3 main.py
 ```
 (This command may vary based on your OS.)
+
+If you don't want to self-host the bot, you can invite the official instance by clicking [here](https://discord.com/api/oauth2/authorize?client_id=1139964189465653358&permissions=8&scope=bot)!
