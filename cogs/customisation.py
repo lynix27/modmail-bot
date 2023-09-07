@@ -151,7 +151,7 @@ class customisation(commands.Cog):
             autocommit=True
         )
         cursor = await conn.cursor()
-        await cursor.execute("INSERT INTO ticket_categories (SERVERID, CATEGORYID) VALUES (%s, %s) ON DUPLICATE KEY UPDATE CHANNELID = %s", (interaction.guild.id, category.id, category.id))
+        await cursor.execute("INSERT INTO ticket_categories (SERVERID, CATEGORYID) VALUES (%s, %s) ON DUPLICATE KEY UPDATE CATEGORYID = %s", (interaction.guild.id, category.id, category.id))
         await cursor.close()
         conn.close()
         await interaction.response.send_message(f"✅ The ticket channel category is now set to **{category.name}**!", ephemeral=True)
