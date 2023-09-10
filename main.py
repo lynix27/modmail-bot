@@ -18,7 +18,9 @@ class MyBot(commands.Bot):
     def __init__(self):
         super().__init__(
             command_prefix = commands.when_mentioned,
-            intents = discord.Intents.default())
+            intents = discord.Intents.default(),
+            status=discord.Status.online,
+            activity=discord.Game(name="with your tickets ✉️"))
 
     async def setup_hook(self):
         conn = await aiomysql.connect(
