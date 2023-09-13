@@ -3,7 +3,7 @@
 ## Steps to self-host:
 Clone the repository:
 ```bash
-cd ~ && git clone https://github.com/lynix27/modmail-bot
+git clone https://github.com/lynix27/modmail-bot
 ```
 Navigate to the newly created directory:
 ```bash
