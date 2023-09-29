@@ -5,7 +5,7 @@ import os
 import aiomysql
 import asyncio
 from views.ticketcreation import TicketCreation
-
+from funcs.language_check import language_check
 
 class MessageModal(discord.ui.Modal, title="Change ticket creation button message"):
     text = discord.ui.TextInput(label="Enter the new message", placeholder="Input text", min_length=1, max_length=500, style=discord.TextStyle.long)
@@ -13,6 +13,9 @@ class MessageModal(discord.ui.Modal, title="Change ticket creation button messag
 
     async def on_submit(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True, thinking=True)
+
+        lang = await language_check(interaction.guild.id)
+
         conn = await aiomysql.connect(
             host=os.getenv("HOST"),
             user=os.getenv("USER"),
@@ -25,7 +28,7 @@ class MessageModal(discord.ui.Modal, title="Change ticket creation button messag
         await cursor.execute("SELECT MESSAGEID FROM ticket_messages WHERE SERVERID = %s", (interaction.guild.id,))
         messageid = await cursor.fetchone()
         if messageid is None:
-            await interaction.followup.send(content="❗ I am not set up yet. Please use `/setup` to do that.", ephemeral=True)
+            await interaction.followup.send(content=lang.NOT_SETUP_YET, ephemeral=True)
             await cursor.close()
             conn.close()
             return
@@ -34,7 +37,7 @@ class MessageModal(discord.ui.Modal, title="Change ticket creation button messag
             await cursor.execute("SELECT CHANNELID FROM ticket_messages WHERE SERVERID = %s", (interaction.guild.id,))
             channelid = await cursor.fetchone()
             if channelid is None:
-                await interaction.followup.send(content="❗ I am not set up yet. Please use `/setup` to do that.", ephemeral=True)
+                await interaction.followup.send(content=lang.NOT_SETUP_YET, ephemeral=True)
                 await cursor.close()
                 conn.close()
                 return
@@ -44,7 +47,7 @@ class MessageModal(discord.ui.Modal, title="Change ticket creation button messag
                 except:
                     await cursor.close()
                     conn.close()
-                    await interaction.followup.send("❗ An error occured. Please check if the message and the channel still exists. Use `/setup` to set me up again.", ephemeral=True)
+                    await interaction.followup.send(lang.AN_ERROR_OCCURED_PLEASE_CHECK_IF_THE_MESSAGE_AND_CHANNEL_EXIST, ephemeral=True)
                     return
 
                 if self.label.value == "":
@@ -79,6 +82,9 @@ class customisation(commands.Cog):
     )
     async def ticketmanager(self, interaction: discord.Interaction, choice: app_commands.Choice[int]):
         await interaction.response.defer(ephemeral=True, thinking=True)
+
+        lang = await language_check(interaction.guild.id)
+
         conn = await aiomysql.connect(
             host=os.getenv("HOST"),
             user=os.getenv("USER"),
@@ -92,26 +98,29 @@ class customisation(commands.Cog):
         if result is None:
             await cursor.close()
             conn.close()
-            await interaction.followup.send("❗ I am not set up yet. Please use `/setup` to do that.", ephemeral=True)
+            await interaction.followup.send(lang.NOT_SETUP_YET, ephemeral=True)
             return
         else:
             if choice.value == 1:
                 await cursor.execute("INSERT INTO ticket_manager_roles (SERVERID, STATE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE STATE = %s", (interaction.guild.id, "enabled", "enabled",))
                 await cursor.close()
                 conn.close()
-                await interaction.followup.send("✅ Ticket Manager role is now enabled.", ephemeral=True)
+                await interaction.followup.send(lang.TICKET_MANAGER_ROLE_NOW_ENABLED, ephemeral=True)
 
             if choice.value == 2:
                 await cursor.execute("INSERT INTO ticket_manager_roles (SERVERID, STATE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE STATE = %s", (interaction.guild.id, "disabled", "disabled",))
                 await cursor.close()
                 conn.close()
-                await interaction.followup.send("✅ Ticket Manager role is now disabled.", ephemeral=True)
+                await interaction.followup.send(lang.TICKET_MANAGER_ROLE_NOW_DISABLED, ephemeral=True)
 
 
     @app_commands.command(name="ticketmanager-role", description="Change the Ticket Manager role")
     @app_commands.checks.has_permissions(administrator=True)
     async def ticketmanager_role(self, interaction: discord.Interaction, role: discord.Role):
         await interaction.response.defer(ephemeral=True, thinking=True)
+
+        lang = await language_check(interaction.guild.id)
+
         conn = await aiomysql.connect(
             host=os.getenv("HOST"),
             user=os.getenv("USER"),
@@ -125,7 +134,7 @@ class customisation(commands.Cog):
         if result is None:
             await cursor.close()
             conn.close()
-            await interaction.followup.send("❗ I am not set up yet. Please use `/setup` to do that.", ephemeral=True)
+            await interaction.followup.send(lang.NOT_SETUP_YET, ephemeral=True)
             return
         else:
             await cursor.execute("SELECT STATE FROM ticket_manager_roles WHERE SERVERID = %s", (interaction.guild.id,))
@@ -134,15 +143,17 @@ class customisation(commands.Cog):
                 await cursor.execute("INSERT INTO ticket_manager_roles (SERVERID, ROLEID, STATE) VALUES (%s, %s, %s) ON DUPLICATE KEY UPDATE ROLEID = %s, STATE = %s", (interaction.guild.id, role.id, "enabled", role.id, "enabled",))
                 await cursor.close()
                 conn.close()
-                await interaction.followup.send(f"I changed the ticket manager role to {role.mention}!", ephemeral=True)
+                await interaction.followup.send(lang.CHANGED_TICKET_MANAGER_ROLE_TO.format(role.mention), ephemeral=True)
             else:
                 await cursor.close()
                 conn.close()
-                await interaction.followup.send("❗ The Ticket Manager role module is disabled!", ephemeral=True)
+                await interaction.followup.send(lang.TICKET_MANAGER_MODULE_DISABLED, ephemeral=True)
     
     @app_commands.command(name="ticket-category", description="Set a ticket category")
     @app_commands.checks.has_permissions(administrator=True)
     async def ticket_category(self, interaction: discord.Interaction, category: discord.CategoryChannel):
+        lang = await language_check(interaction.guild.id)
+
         conn = await aiomysql.connect(
             host=os.getenv("HOST"),
             user=os.getenv("USER"),
@@ -154,7 +165,7 @@ class customisation(commands.Cog):
         await cursor.execute("INSERT INTO ticket_categories (SERVERID, CATEGORYID) VALUES (%s, %s) ON DUPLICATE KEY UPDATE CATEGORYID = %s", (interaction.guild.id, category.id, category.id))
         await cursor.close()
         conn.close()
-        await interaction.response.send_message(f"✅ The ticket channel category is now set to **{category.name}**!", ephemeral=True)
+        await interaction.response.send_message(lang.TICKET_CHANNEL_CATEGORY_NOW_SET_TO.format(category.name), ephemeral=True)
 
 async def setup(bot: commands.Bot):
     bot.add_view(TicketCreation())

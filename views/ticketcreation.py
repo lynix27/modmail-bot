@@ -1,6 +1,7 @@
 import discord
 import aiomysql
 import os
+from funcs.language_check import language_check
 
 class TicketCreation(discord.ui.View):
     def __init__(self, label: str=None, message: str=None):
@@ -15,6 +16,9 @@ class TicketCreation(discord.ui.View):
         
         async def button1_callback(interaction: discord.Interaction):
             await interaction.response.defer(ephemeral=True, thinking=True)
+
+            lang = await language_check(interaction.guild.id)
+
             conn = await aiomysql.connect(
                 host=os.getenv("HOST"),
                 user=os.getenv("USER"),
@@ -32,8 +36,9 @@ class TicketCreation(discord.ui.View):
             if discord.utils.get(category.text_channels, name=f"{interaction.user.name}"):
                 await cursor.close()
                 conn.close()
-                await interaction.followup.send("❗ There already is an open ticket channel! Please wait for it to be closed in order to open a new one.", ephemeral=True)
+                await interaction.followup.send(lang.ALREADY_OPEN_TICKET_CHANNEL, ephemeral=True)
                 return
+
 
             channel = await category.create_text_channel(name=interaction.user.name, overwrites=overwrites)
 
@@ -44,14 +49,14 @@ class TicketCreation(discord.ui.View):
             else:
                 try:
                     log_channel = interaction.guild.get_channel(int(result[0]))
-                    embed = discord.Embed(title="✉️ Ticket has been created", description=f"The ticket channel for the user **{channel.name}** (**{channel.id}**) has been created by {interaction.user.mention} (**{interaction.user.id}**).")
+                    embed = discord.Embed(title=lang.TICKET_HAS_BEEN_CREATED, description=lang.TICKET_CHANNEL_FOR_USER_CREATED_BY.format(channel.name, channel.id, interaction.user.mention, interaction.user.id))
                     await log_channel.send(embed=embed)
                 except:
                     pass
 
             await cursor.close()
             conn.close()
-            await interaction.followup.send(f"✅ Ticket channel created: {channel.mention}", ephemeral=True)
+            await interaction.followup.send(lang.TICKET_CHANNEL_CREATED.format(channel.mention), ephemeral=True)
 
 
 

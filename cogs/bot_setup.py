@@ -6,6 +6,8 @@ import os
 from views.channelclosureconfirmation import ChannelClosureConfirmation
 from views.setup_confirmation import SetupConfirmationView
 from views.ticketcreation import TicketCreation
+from funcs.language_check import language_check
+
 
 class setup_channels(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -15,12 +17,16 @@ class setup_channels(commands.Cog):
     @app_commands.command(name="setup", description="Set up the bot")
     @app_commands.checks.has_permissions(administrator=True)
     async def modmail_setup(self, interaction: discord.Interaction):
-        await interaction.response.send_message("🔧 Do you want to start the setup process?", view=SetupConfirmationView(), ephemeral=True)
+        lang = await language_check(interaction.guild.id)
+        await interaction.response.send_message(lang.START_SETUP_PROCESS, view=SetupConfirmationView(), ephemeral=True)
 
 
     @app_commands.command(name="close-ticket", description="Close the ticket channel")
     async def close_ticket(self, interaction: discord.Interaction):
         await interaction.response.defer(ephemeral=True)
+
+        lang = await language_check(interaction.guild.id)
+
         conn = await aiomysql.connect(
             host=os.getenv("HOST"),
             user=os.getenv("USER"),
@@ -34,7 +40,7 @@ class setup_channels(commands.Cog):
         if result[0] is None:
             await cursor.close()
             conn.close()
-            await interaction.followup.send("❗ I am not set up yet. Please use `/setup` to do that.", ephemeral=True)
+            await interaction.followup.send(lang.NOT_SETUP_YET, ephemeral=True)
             return
         
         else:
@@ -43,17 +49,17 @@ class setup_channels(commands.Cog):
                 if role in interaction.user.roles:
                     await cursor.close()
                     conn.close()
-                    await interaction.followup.send("❗ Are you sure you want to close the ticket channel?", ephemeral=True, view=ChannelClosureConfirmation())
+                    await interaction.followup.send(lang.ARE_YOU_SURE_TO_CLOSE_TICKET_CHANNEL, ephemeral=True, view=ChannelClosureConfirmation())
                     return
                 else:
                     await cursor.close()
                     conn.close()
-                    await interaction.followup.send("❗ You are not allowed to do this!", ephemeral=True)
+                    await interaction.followup.send(lang.NOT_ALLOWED_TO_DO_THIS, ephemeral=True)
                     return
             else:
                 await cursor.close()
                 conn.close()
-                await interaction.followup.send("❗ Are you sure you want to close the ticket channel?", ephemeral=True, view=ChannelClosureConfirmation())
+                await interaction.followup.send(lang.ARE_YOU_SURE_TO_CLOSE_TICKET_CHANNEL, ephemeral=True, view=ChannelClosureConfirmation())
                 return
                     
 

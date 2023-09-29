@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 import logging
 from discord.app_commands import AppCommandError
 import aiomysql
+from discord import app_commands
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -103,8 +104,19 @@ class MyBot(commands.Bot):
         )
         print("✅ Created ticket_manager_roles database")
 
+        await cursor.execute(
+            """
+            CREATE TABLE IF NOT EXISTS languages (
+                SERVERID VARCHAR(100) PRIMARY KEY,
+                LANGUAGE TEXT
+            )
+            """
+        )
+        print("✅ Created languages database")
+
         await cursor.close()
         conn.close()
+
         self.session = aiohttp.ClientSession()
         for f in os.listdir("./cogs"):
             if f.endswith(".py"):
@@ -127,6 +139,33 @@ async def on_app_command_error(interaction: discord.Interaction, error: AppComma
 async def on_command_error(ctx: commands.Context, error: discord.errors):
     await ctx.reply(error)
 
+@bot.tree.command(name="set-language")
+@app_commands.checks.has_permissions(administrator=True)
+@app_commands.choices(
+    language = [
+        app_commands.Choice(name="English", value="en"),
+        app_commands.Choice(name="German", value="de")
+    ]
+)
+async def set_language(interaction: discord.Interaction, language: app_commands.Choice[str]):
+    await interaction.response.defer(ephemeral=True)
+    conn = await aiomysql.connect(
+        host=os.getenv("HOST"),
+        user=os.getenv("USER"),
+        password=os.getenv("PASSWORD"),
+        db=os.getenv("DB"),
+        autocommit=True
+    )
+    cursor = await conn.cursor()
+    if language.value == "en":
+        await cursor.execute("INSERT INTO languages (SERVERID, LANGUAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE LANGUAGE = %s", (interaction.guild.id, language.value, language.value,))
+
+    if language.value == "de":
+        await cursor.execute("INSERT INTO languages (SERVERID, LANGUAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE LANGUAGE = %s", (interaction.guild.id, language.value, language.value,))
+
+    await cursor.close()
+    conn.close()
+    await interaction.followup.send(f"Language set to **{language.name}**", ephemeral=True)
 
 load_dotenv()
 bot.run(os.getenv("TOKEN"))
