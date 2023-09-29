@@ -144,7 +144,8 @@ async def on_command_error(ctx: commands.Context, error: discord.errors):
 @app_commands.choices(
     language = [
         app_commands.Choice(name="English", value="en"),
-        app_commands.Choice(name="German", value="de")
+        app_commands.Choice(name="German", value="de"),
+        app_commands.Choice(name="Spanish", value="es")
     ]
 )
 async def set_language(interaction: discord.Interaction, language: app_commands.Choice[str]):
@@ -161,6 +162,9 @@ async def set_language(interaction: discord.Interaction, language: app_commands.
         await cursor.execute("INSERT INTO languages (SERVERID, LANGUAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE LANGUAGE = %s", (interaction.guild.id, language.value, language.value,))
 
     if language.value == "de":
+        await cursor.execute("INSERT INTO languages (SERVERID, LANGUAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE LANGUAGE = %s", (interaction.guild.id, language.value, language.value,))
+
+    if language.value == "es":
         await cursor.execute("INSERT INTO languages (SERVERID, LANGUAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE LANGUAGE = %s", (interaction.guild.id, language.value, language.value,))
 
     await cursor.close()
