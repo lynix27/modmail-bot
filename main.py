@@ -139,7 +139,7 @@ async def on_app_command_error(interaction: discord.Interaction, error: AppComma
 async def on_command_error(ctx: commands.Context, error: discord.errors):
     await ctx.reply(error)
 
-@bot.tree.command(name="set-language")
+@bot.tree.command(name="set-language", description="Set the bot language")
 @app_commands.checks.has_permissions(administrator=True)
 @app_commands.choices(
     language = [
