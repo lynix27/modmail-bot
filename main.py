@@ -145,7 +145,8 @@ async def on_command_error(ctx: commands.Context, error: discord.errors):
     language = [
         app_commands.Choice(name="English", value="en"),
         app_commands.Choice(name="German", value="de"),
-        app_commands.Choice(name="Spanish", value="es")
+        app_commands.Choice(name="Spanish", value="es"),
+        app_commands.Choice(name="French", value="fr"),
     ]
 )
 async def set_language(interaction: discord.Interaction, language: app_commands.Choice[str]):
@@ -158,15 +159,7 @@ async def set_language(interaction: discord.Interaction, language: app_commands.
         autocommit=True
     )
     cursor = await conn.cursor()
-    if language.value == "en":
-        await cursor.execute("INSERT INTO languages (SERVERID, LANGUAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE LANGUAGE = %s", (interaction.guild.id, language.value, language.value,))
-
-    if language.value == "de":
-        await cursor.execute("INSERT INTO languages (SERVERID, LANGUAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE LANGUAGE = %s", (interaction.guild.id, language.value, language.value,))
-
-    if language.value == "es":
-        await cursor.execute("INSERT INTO languages (SERVERID, LANGUAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE LANGUAGE = %s", (interaction.guild.id, language.value, language.value,))
-
+    await cursor.execute("INSERT INTO languages (SERVERID, LANGUAGE) VALUES (%s, %s) ON DUPLICATE KEY UPDATE LANGUAGE = %s", (interaction.guild.id, language.value, language.value,))
     await cursor.close()
     conn.close()
     await interaction.followup.send(f"Language set to **{language.name}**", ephemeral=True)

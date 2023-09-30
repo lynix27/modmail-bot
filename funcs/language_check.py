@@ -3,6 +3,7 @@ import os
 import strings.en
 import strings.de
 import strings.es
+import strings.fr
 
 async def language_check(guild_id):
     conn = await aiomysql.connect(
@@ -19,9 +20,15 @@ async def language_check(guild_id):
     conn.close()
     if result is None:
         return strings.en
+    
     if result[0] == "en":
         return strings.en
+    
     if result[0] == "de":
         return strings.de
+    
     if result[0] == "es":
         return strings.es
+    
+    if result[0] == "fr":
+        return strings.fr
