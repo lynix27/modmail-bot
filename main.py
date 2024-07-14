@@ -7,6 +7,7 @@ import logging
 from discord.app_commands import AppCommandError
 import aiomysql
 from discord import app_commands
+import json
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -24,11 +25,13 @@ class MyBot(commands.Bot):
             activity=discord.Game(name="with your tickets ✉️"))
 
     async def setup_hook(self):
+        with open("db.json", "r") as f:
+            db = json.load(f)
         conn = await aiomysql.connect(
-            host=os.getenv("HOST"),
-            user=os.getenv("USER"),
-            password=os.getenv("PASSWORD"),
-            db=os.getenv("DB"),
+            host=db["HOST"],
+            user=db["USER"],
+            password=db["PASSWORD"],
+            db=db["DB"],
             autocommit=True
         )
         cursor = await conn.cursor()
@@ -151,11 +154,13 @@ async def on_command_error(ctx: commands.Context, error: discord.errors):
 )
 async def set_language(interaction: discord.Interaction, language: app_commands.Choice[str]):
     await interaction.response.defer(ephemeral=True)
+    with open("db.json", "r") as f:
+        db = json.load(f)
     conn = await aiomysql.connect(
-        host=os.getenv("HOST"),
-        user=os.getenv("USER"),
-        password=os.getenv("PASSWORD"),
-        db=os.getenv("DB"),
+        host=db["HOST"],
+        user=db["USER"],
+        password=db["PASSWORD"],
+        db=db["DB"],
         autocommit=True
     )
     cursor = await conn.cursor()

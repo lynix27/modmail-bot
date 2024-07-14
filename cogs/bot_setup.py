@@ -7,7 +7,7 @@ from views.channelclosureconfirmation import ChannelClosureConfirmation
 from views.setup_confirmation import SetupConfirmationView
 from views.ticketcreation import TicketCreation
 from funcs.language_check import language_check
-
+import json
 
 class setup_channels(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -27,11 +27,13 @@ class setup_channels(commands.Cog):
 
         lang = await language_check(interaction.guild.id)
 
+        with open("db.json", "r") as f:
+            db = json.load(f)
         conn = await aiomysql.connect(
-            host=os.getenv("HOST"),
-            user=os.getenv("USER"),
-            password=os.getenv("PASSWORD"),
-            db=os.getenv("DB"),
+            host=db["HOST"],
+            user=db["USER"],
+            password=db["PASSWORD"],
+            db=db["DB"],
             autocommit=True
         )
         cursor = await conn.cursor()

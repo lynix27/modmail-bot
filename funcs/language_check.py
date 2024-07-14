@@ -4,13 +4,16 @@ import strings.en
 import strings.de
 import strings.es
 import strings.fr
+import json
 
 async def language_check(guild_id):
+    with open("db.json", "r") as f:
+        db = json.load(f)
     conn = await aiomysql.connect(
-        host=os.getenv('HOST'),
-        user=os.getenv('USER'),
-        password=os.getenv('PASSWORD'),
-        db=os.getenv('DB'),
+        host=db["HOST"],
+        user=db["USER"],
+        password=db["PASSWORD"],
+        db=db["DB"],
         autocommit=True
     )
     cursor = await conn.cursor()

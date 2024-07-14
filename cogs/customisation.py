@@ -6,6 +6,7 @@ import aiomysql
 import asyncio
 from views.ticketcreation import TicketCreation
 from funcs.language_check import language_check
+import json
 
 class MessageModal(discord.ui.Modal, title="Change ticket creation button message"):
     text = discord.ui.TextInput(label="Enter the new message", placeholder="Input text", min_length=1, max_length=500, style=discord.TextStyle.long)
@@ -16,11 +17,13 @@ class MessageModal(discord.ui.Modal, title="Change ticket creation button messag
 
         lang = await language_check(interaction.guild.id)
 
+        with open("db.json", "r") as f:
+            db = json.load(f)
         conn = await aiomysql.connect(
-            host=os.getenv("HOST"),
-            user=os.getenv("USER"),
-            password=os.getenv("PASSWORD"),
-            db=os.getenv("DB"),
+            host=db["HOST"],
+            user=db["USER"],
+            password=db["PASSWORD"],
+            db=db["DB"],
             autocommit=True
         )
         cursor = await conn.cursor()
@@ -85,11 +88,13 @@ class customisation(commands.Cog):
 
         lang = await language_check(interaction.guild.id)
 
+        with open("db.json", "r") as f:
+            db = json.load(f)
         conn = await aiomysql.connect(
-            host=os.getenv("HOST"),
-            user=os.getenv("USER"),
-            password=os.getenv("PASSWORD"),
-            db=os.getenv("DB"),
+            host=db["HOST"],
+            user=db["USER"],
+            password=db["PASSWORD"],
+            db=db["DB"],
             autocommit=True
         )
         cursor = await conn.cursor()
@@ -121,11 +126,13 @@ class customisation(commands.Cog):
 
         lang = await language_check(interaction.guild.id)
 
+        with open("db.json", "r") as f:
+            db = json.load(f)
         conn = await aiomysql.connect(
-            host=os.getenv("HOST"),
-            user=os.getenv("USER"),
-            password=os.getenv("PASSWORD"),
-            db=os.getenv("DB"),
+            host=db["HOST"],
+            user=db["USER"],
+            password=db["PASSWORD"],
+            db=db["DB"],
             autocommit=True
         )
         cursor = await conn.cursor()
@@ -154,11 +161,13 @@ class customisation(commands.Cog):
     async def ticket_category(self, interaction: discord.Interaction, category: discord.CategoryChannel):
         lang = await language_check(interaction.guild.id)
 
+        with open("db.json", "r") as f:
+            db = json.load(f)
         conn = await aiomysql.connect(
-            host=os.getenv("HOST"),
-            user=os.getenv("USER"),
-            password=os.getenv("PASSWORD"),
-            db=os.getenv("DB"),
+            host=db["HOST"],
+            user=db["USER"],
+            password=db["PASSWORD"],
+            db=db["DB"],
             autocommit=True
         )
         cursor = await conn.cursor()

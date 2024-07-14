@@ -1,8 +1,8 @@
 import discord
 import asyncio
 import aiomysql
-import os
 from funcs.language_check import language_check
+import json
 
 class ChannelClosureConfirmation(discord.ui.View):
     def __init__(self):
@@ -14,11 +14,13 @@ class ChannelClosureConfirmation(discord.ui.View):
 
         lang = await language_check(interaction.guild.id)
 
+        with open("db.json", "r") as f:
+            db = json.load(f)
         conn = await aiomysql.connect(
-            host=os.getenv("HOST"),
-            user=os.getenv("USER"),
-            password=os.getenv("PASSWORD"),
-            db=os.getenv("DB"),
+            host=db["HOST"],
+            user=db["USER"],
+            password=db["PASSWORD"],
+            db=db["DB"],
             autocommit=True
         )
         cursor = await conn.cursor()
