@@ -41,4 +41,4 @@ python3 main.py
 ## If you don't want to self-host the bot, you can invite the official instance by clicking [here](https://discord.com/api/oauth2/authorize?client_id=1139964189465653358&permissions=8&scope=bot)!
 
 ## Adding translations
-Go to [this file](./strings/en.py) and copy it's content. Fork this repository. Create a new Python file in the [strings folder](./strings), name it like your language's language tag and translate **ONLY THE STRINGS, NOT THE STRING NAMES**. Create a pull request.
+Go to [this file](./strings/en.py) and copy it's content. Fork this repository. Create a new Python file in the [strings folder](./strings), name it like your language's [language tag](https://en.wikipedia.org/wiki/IETF_language_tag#List_of_common_primary_language_subtags) and translate **ONLY THE STRINGS, NOT THE STRING NAMES**. Create a pull request.
